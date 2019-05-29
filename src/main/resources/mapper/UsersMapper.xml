@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loser.ecommerce.mapper.UsersMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.loser.ecommerce.entity.Users">
+        <id column="User_Uuid" property="userUuid" />
+        <result column="Username" property="username" />
+        <result column="Real_Name" property="realName" />
+        <result column="Password" property="password" />
+        <result column="User_Status" property="userStatus" />
+        <result column="Gender" property="gender" />
+        <result column="Create_Date" property="createDate" />
+        <result column="Remark" property="remark" />
+        <result column="Salt" property="salt" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        ${alias}User_Uuid, Username, Real_Name, Password, User_Status, Gender, ${alias}Create_Date, ${alias}Remark, Salt
+    </sql>
+
+
+    <!-- 查询条件 -->
+    <sql id="Example_Where_Clause">
+        where 1=1
+        <trim  suffixOverrides="," >
+            <if test="parameters.companyName != null and parameters.companyName != ''" >
+                <bind name="parameters.companyName" value="'%' + parameters.companyName + '%'"/>
+                and Company_Uuid in (
+                  select Company_Uuid from Companies where Company_Name like #{parameters.companyName}
+                )
+            </if>
+            <if test="parameters.companyUuid != null and parameters.companyUuid != ''" >
+                and Company_Uuid = #{parameters.companyUuid}
+            </if>
+            <if test="parameters.accountType != null and parameters.accountType != ''" >
+                and Account_Type = #{parameters.accountType}
+            </if>
+            <if test="parameters.industryUuid != null and parameters.industryUuid != ''" >
+                and Industry_Uuid = #{parameters.industryUuid}
+            </if>
+            <if test="parameters.storeCity != null and parameters.storeCity != ''">
+                and Store_City = #{parameters.storeCity}
+            </if>
+            <if test="parameters.acceptOrganize != null and parameters.acceptOrganize != ''">
+                and Accept_Organize = #{parameters.acceptOrganize}
+            </if>
+        </trim>
+    </sql>
+
+    <!--关联查询出符合条件的userUuid-->
+    <select id="selectUseUuids" resultType="string">
+        SELECT User_Uuid FROM Users
+        where 1=1
+        <if test="parameters.companyUuid != null and parameters.companyUuid != ''" >
+            and Company_Uuid = #{parameters.companyUuid}
+        </if>
+        <if test="parameters.industryUuid != null and parameters.industryUuid != ''" >
+            and Industry_Uuid = #{parameters.industryUuid}
+        </if>
+        <if test="parameters.acceptOrganize != null or parameters.storeCity != null">
+            and User_Uuid IN (
+            SELECT User_Uuid FROM Store_Users
+            WHERE
+            Store_Uuid IN (
+            SELECT Store_Uuid FROM Stores
+            WHERE 1=1
+            <if test="parameters.storeCity != null and parameters.storeCity != ''">
+                and Store_City = #{parameters.storeCity}
+            </if>
+            <if test="parameters.acceptOrganize != null and parameters.acceptOrganize != ''">
+                and Accept_Organize = #{parameters.acceptOrganize}
+            </if>
+        </if>
+    </select>
+
+    <!-- 用户账号列表关联查询 -->
+    <select id="selectAccountCount" resultType="java.lang.Integer">
+        SELECT count(1) FROM Users
+        WHERE 1=1
+        <if test="parameters.startCreateDate != null and parameters.startCreateDate != ''">
+            and Create_Date &gt;= #{parameters.startCreateDate}
+        </if>
+        <if test="parameters.endCreateDate != null and parameters.endCreateDate != ''">
+            and Create_Date &lt;= #{parameters.endCreateDate}
+        </if>
+        <if test="parameters.userUuids != null and parameters.userUuids.size > 0" >
+            and User_Uuid in
+            <foreach collection="parameters.userUuids" item="userUuid" index="index" open="(" close=")" separator=",">
+                #{userUuid}
+            </foreach>
+        </if>
+    </select>
+
+
+    <select id="selectUserInfoVoForPage" resultType="com.loser.ecommerce.vo.UserInfoVo">
+        select
+        <include refid="Base_Column_List">
+          <property name="alias" value="Users."/>
+        </include>, Company_Name, Industry_Name, Role_Name
+        from Users
+        left join Companies on Users.Company_Uuid = Companies.Company_Uuid
+        left join Industries on Industries.Industry_Uuid = Users.Industry_Uuid
+        left join Roles on Roles.Role_Uuid = Users.Role_Uuid
+        where 1=1
+        <if test="parameters.companyName != null and parameters.companyName != ''" >
+            <bind name="parameters.companyName" value="'%' + parameters.companyName + '%'"/>
+            and Company_Name like #{parameters.companyName}
+        </if>
+        <if test="parameters.companyUuid != null and parameters.companyUuid != ''" >
+            and Company_Uuid = #{parameters.companyUuid}
+        </if>
+        <if test="parameters.accountType != null and parameters.accountType != ''" >
+            and Account_Type = #{parameters.accountType}
+        </if>
+        <if test="parameters.industryUuid != null and parameters.industryUuid != ''" >
+            and Industry_Uuid = #{parameters.industryUuid}
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loser.ecommerce.mapper.PermissionsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.loser.ecommerce.entity.Permissions">
+        <id column="Permission_Uuid" property="permissionUuid" />
+        <result column="Permission_Description" property="permissionDescription"/>
+        <result column="Permission_Type" property="permissionType"/>
+        <result column="Permission_Name" property="permissionName" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        Permission_Uuid, User_Uuid, Permission_Name, Permission_Description, Permission_Type
+    </sql>
+    
+    <select id="selectPermissionByRole" parameterType="string" resultType="com.loser.ecommerce.vo.PermissionVo">
+        SELECT
+            p.* , pr.Role_Uuid,
+            CASE
+        WHEN pr.Permission_Role_Uuid IS NOT NULL THEN
+            '1'
+        ELSE
+            '0'
+        END permission
+        FROM
+            Permissions p
+        LEFT JOIN Permission_Roles pr ON p.Permission_Uuid = pr.Permission_Uuid
+        AND pr.Role_Uuid = #{roleUuid}
+        WHERE
+            p.Permission_Type IS NOT NULL
+        ORDER BY
+            p.Permission_Type DESC
+    </select>
+
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.loser.ecommerce.mapper.UsersExtMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="UserInfoMap" type="com.loser.ecommerce.entity.UsersExt">
+        <id column="User_Uuid" property="userUuid"/>
+        <result column="Username" property="username"/>
+        <result column="Real_Name" property="realName"/>
+        <result column="Password" property="password"/>
+        <result column="User_Status" property="userStatus"/>
+        <result column="Create_Date" property="createDate"/>
+        <result column="Role_Uuid" property="roleUuid"/>
+        <result column="Remark" property="remark"/>
+        <result column="Salt" property="salt"/>
+        <collection property="roles" ofType="com.loser.ecommerce.entity.Roles">
+            <id column="Role_Uuid" property="roleUuid"/>
+            <result column="Role_Name" property="roleName"/>
+        </collection>
+        <collection property="permissions" ofType="com.loser.ecommerce.entity.Permissions">
+            <id column="Permission_Uuid" property="permissionUuid"/>
+            <result column="Permission_Name" property="permissionName"/>
+            <result column="Permission_Description" property="permissionDescription"/>
+            <result column="Permission_Type" property="permissionType"/>
+        </collection>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        Users.User_Uuid, Username,Real_Name, Password, User_Status, Users.Create_Date, ru.Role_Uuid, Remark, Salt,
+          Roles.Role_Uuid, Roles.Role_Name,
+          Permissions.Permission_Uuid,Permissions.Permission_Description, Permissions.Permission_Name, Permissions.Permission_Type
+    </sql>
+    <select id="selectOneUserExtByUsername" resultMap="UserInfoMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM Users
+        LEFT JOIN Role_Users ru on ru.User_Uuid = Users.User_Uuid
+        LEFT JOIN Roles on ru.Role_Uuid = Roles.Role_Uuid
+        LEFT JOIN Permission_Roles pr on pr.Role_Uuid = Roles.Role_Uuid
+        LEFT JOIN Permissions on pr.Permission_Uuid = Permissions.Permission_Uuid
+        WHERE Users.username = #{username,jdbcType=VARCHAR}
+    </select>
+</mapper>

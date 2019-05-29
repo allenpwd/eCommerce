@@ -1,0 +1,47 @@
+#Server
+server:
+  port: 8080
+  servlet:
+    context-path: /
+#Spring
+spring:
+  #mysql
+  datasource:
+    name: eCommonerce
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql://127.0.0.1:3306/ecommerce?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2B8
+    type: com.alibaba.druid.pool.DruidDataSource
+    #druid
+    druid:
+      initial-size: 5
+      max-active: 10
+      min-idle: 2
+      max-wait: 60000
+      filters: stat,filter
+      validation-query: SELECT 1 FROM DUAL
+      validation-query-timeout: 60000
+      max-wait-thread-count: 10
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 30000
+      filter:
+        commons-log:
+          statement-executable-sql-log-enable: true
+  aop:
+    proxy-target-class: true
+#mybatis-plus
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*Mapper.xml
+  type-aliases-package: com.loser.ecommonerce.entity
+  type-enums-package: com.loser.ecommonerce.base.enums
+  global-config:
+    db-config:
+      id-type: uuid
+      field-strategy: not_empty
+      capital-mode: true
+      logic-delete-value: 0
+      logic-not-delete-value: 1
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true
