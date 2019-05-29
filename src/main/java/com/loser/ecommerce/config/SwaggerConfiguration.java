@@ -89,7 +89,7 @@ public class SwaggerConfiguration {
      */
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("New Retail 2.0 接口测试界面。")
+                .title("eCommerce 接口测试界面。")
                 .description("测试界面")
                 .version("1.0")
                 .build();
